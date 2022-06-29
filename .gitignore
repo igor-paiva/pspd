@@ -1,4 +1,19 @@
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+# Unignore all dirs
+!**/Makefile
+
 .vscode/*
+
+# Ignore output files
+*.o
 
 # Ignore PDF files
 *.pdf
