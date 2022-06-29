@@ -3,18 +3,18 @@
 
 # Parameters
 
-CLIENT = lab1_rpc_2_workers_client
-SERVER = lab1_rpc_2_workers_server
+CLIENT = lab1_rpc_2_threads_client
+SERVER = lab1_rpc_2_threads_server
 
 SOURCES_CLNT.c =
 SOURCES_CLNT.h =
 SOURCES_SVC.c =
 SOURCES_SVC.h =
-SOURCES.x = lab1_rpc_2_workers.x
+SOURCES.x = lab1_rpc_2_threads.x
 
-TARGETS_SVC.c = lab1_rpc_2_workers_svc.c lab1_rpc_2_workers_server.c lab1_rpc_2_workers_xdr.c
-TARGETS_CLNT.c = lab1_rpc_2_workers_clnt.c lab1_rpc_2_workers_client.c lab1_rpc_2_workers_xdr.c
-TARGETS = lab1_rpc_2_workers.h lab1_rpc_2_workers_xdr.c lab1_rpc_2_workers_clnt.c lab1_rpc_2_workers_svc.c lab1_rpc_2_workers_client.c lab1_rpc_2_workers_server.c
+TARGETS_SVC.c = lab1_rpc_2_threads_svc.c lab1_rpc_2_threads_server.c lab1_rpc_2_threads_xdr.c
+TARGETS_CLNT.c = lab1_rpc_2_threads_clnt.c lab1_rpc_2_threads_client.c lab1_rpc_2_threads_xdr.c
+TARGETS = lab1_rpc_2_threads.h lab1_rpc_2_threads_xdr.c lab1_rpc_2_threads_clnt.c lab1_rpc_2_threads_svc.c lab1_rpc_2_threads_client.c lab1_rpc_2_threads_server.c
 
 OBJECTS_CLNT = $(SOURCES_CLNT.c:%.c=%.o) $(TARGETS_CLNT.c:%.c=%.o)
 OBJECTS_SVC = $(SOURCES_SVC.c:%.c=%.o) $(TARGETS_SVC.c:%.c=%.o)

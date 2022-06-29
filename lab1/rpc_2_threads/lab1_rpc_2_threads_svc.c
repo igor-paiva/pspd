@@ -3,7 +3,7 @@
  * It was generated using rpcgen.
  */
 
-#include "lab1_rpc_2_workers.h"
+#include "lab1_rpc_2_threads.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <rpc/pmap_clnt.h>
@@ -15,35 +15,6 @@
 #ifndef SIG_PF
 #define SIG_PF void(*)(int)
 #endif
-
-sem_t * mutex;
-SharedData * shared_data;
-
-void handle_failure(int rt, char message[]) {
-  if (rt < 0) {
-    fprintf(stdout, "%s\n", message);
-    exit(1);
-  }
-}
-
-void init_shared() {
-  // place our shared data in shared memory
-  int prot = PROT_READ | PROT_WRITE;
-  int flags = MAP_SHARED | MAP_ANONYMOUS;
-  mutex = mmap(NULL, sizeof(sem_t), prot, flags, -1, 0);
-	shared_data = mmap(NULL, sizeof(SharedData), prot, flags, -1, 0);
-
-	shared_data->min1 = -1;
-	shared_data->min2 = -1;
-	shared_data->max2 = -1;
-	shared_data->max2 = -1;
-
-  handle_failure(mutex == MAP_FAILED ? -1 : 0, "Não conseguiu alocar memória");
-
-	handle_failure(shared_data == MAP_FAILED ? -1 : 0, "Não conseguiu alocar memória");
-
-  sem_init(mutex, 1, 1);
-}
 
 static void
 prog_100(struct svc_req *rqstp, register SVCXPRT *transp)
@@ -112,8 +83,6 @@ main (int argc, char **argv)
 		fprintf (stderr, "%s", "unable to register (PROG, VERSAO, tcp).");
 		exit(1);
 	}
-
-	init_shared();
 
 	svc_run ();
 	fprintf (stderr, "%s", "svc_run returned");

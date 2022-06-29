@@ -4,9 +4,8 @@
  * as a guideline for developing your own functions.
  */
 
-#include "lab1_rpc_2_workers.h"
+#include "lab1_rpc_2_threads.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>

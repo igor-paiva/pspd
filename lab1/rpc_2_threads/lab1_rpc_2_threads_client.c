@@ -4,7 +4,8 @@
  * as a guideline for developing your own functions.
  */
 
-#include "lab1_rpc_2_workers.h"
+#include "lab1_rpc_2_threads.h"
+
 #include <time.h>
 
 #define VECTOR_SIZE 500000
@@ -67,8 +68,8 @@ main (int argc, char *argv[])
 		printf ("usage: %s server_host\n", argv[0]);
 		exit (1);
 	}
-
 	host = argv[1];
 	prog_100 (host);
 exit (0);
 }
+

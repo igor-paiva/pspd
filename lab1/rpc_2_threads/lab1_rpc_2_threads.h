@@ -3,24 +3,16 @@
  * It was generated using rpcgen.
  */
 
-#ifndef _LAB1_RPC_2_WORKERS_H_RPCGEN
-#define _LAB1_RPC_2_WORKERS_H_RPCGEN
+#ifndef _LAB1_RPC_2_THREADS_H_RPCGEN
+#define _LAB1_RPC_2_THREADS_H_RPCGEN
 
 #include <rpc/rpc.h>
 
-#include <sys/wait.h>
-#include <unistd.h>
-#include <semaphore.h>
-#include <sys/mman.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct SharedData {
-	float min1, min2;
-	float max1, max2;
-} SharedData;
 
 struct params {
 	float *v;
@@ -66,4 +58,4 @@ extern bool_t xdr_result ();
 }
 #endif
 
-#endif /* !_LAB1_RPC_2_WORKERS_H_RPCGEN */
+#endif /* !_LAB1_RPC_2_THREADS_H_RPCGEN */

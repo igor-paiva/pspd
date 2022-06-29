@@ -3,22 +3,12 @@
  * It was generated using rpcgen.
  */
 
-#include "lab1_rpc_2_workers.h"
-#include "limits.h"
+#include "lab1_rpc_2_threads.h"
 
 bool_t
 xdr_params (XDR *xdrs, params *objp)
 {
-
 	return xdr_array(xdrs, (char**)(&(objp->v)), &(objp->n), INT_MAX, sizeof(float), (xdrproc_t)xdr_float);
-
-	// register int32_t *buf;
-
-	//  if (!xdr_pointer (xdrs, (char **)&objp->v, sizeof (float), (xdrproc_t) xdr_float))
-	// 	 return FALSE;
-	//  if (!xdr_int (xdrs, &objp->n))
-	// 	 return FALSE;
-	// return TRUE;
 }
 
 bool_t

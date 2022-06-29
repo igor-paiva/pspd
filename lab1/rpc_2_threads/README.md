@@ -1,4 +1,4 @@
-# Lab01 - Entrega 2
+# Lab01 - Entrega 2 (thread)
 
 ## Como executar
 
@@ -11,11 +11,11 @@ make
 ### Executar o servidor:
 
 ```
-./lab1_rpc_2_workers_server
+./lab1_rpc_2_threads_server
 ```
 
 ### Executar o cliente:
 
 ```
-./lab1_rpc_2_workers_client localhost
+./lab1_rpc_2_threads_client localhost
 ```
