@@ -6,49 +6,26 @@
 
 #include "lab1_rpc_2_workers.h"
 
-extern sem_t * mutex;
-extern SharedData * shared_data;
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
 
-// typedef struct SharedData {
-// 	float min1, min2;
-// 	float max1, max2;
-// } SharedData;
+#define NUM_THREADS 7
 
-// static sem_t * mutex = NULL;
+typedef struct ThreadParam {
+	float * v;
+	int limits[2];
+	result result;
+} ThreadParam;
 
-// static SharedData * shared_data = NULL;
+result find_min_max(float * v, int s, int e) {
+	result result;
 
-// void handle_failure(int rt, char message[]) {
-//   if (rt < 0) {
-//     fprintf(stdout, "%s\n", message);
-//     exit(1);
-//   }
-// }
+	result.min = v[s];
+	result.max = v[s];
 
-// void init_shared() {
-//   // place our shared data in shared memory
-//   int prot = PROT_READ | PROT_WRITE;
-//   int flags = MAP_SHARED | MAP_ANONYMOUS;
-//   mutex = mmap(NULL, sizeof(sem_t), prot, flags, -1, 0);
-// 	shared_data = mmap(NULL, sizeof(SharedData), prot, flags, -1, 0);
-
-// 	shared_data->min1 = -1;
-// 	shared_data->min2 = -1;
-// 	shared_data->max2 = -1;
-// 	shared_data->max2 = -1;
-
-//   handle_failure(mutex == MAP_FAILED ? -1 : 0, "Não conseguiu alocar memória");
-
-// 	handle_failure(shared_data == MAP_FAILED ? -1 : 0, "Não conseguiu alocar memória");
-
-//   sem_init(mutex, 1, 1);
-// }
-
-
-result get_min_max(float * v, int start, int end) {
-	result result = { .min = v[start], .max = v[start] };
-
-  for (int i = start; i < end; i++) {
+	for (int i = s + 1; i < e; i++) {
     if (v[i] < result.min)
       result.min = v[i];
 
@@ -56,49 +33,44 @@ result get_min_max(float * v, int start, int end) {
       result.max = v[i];
   }
 
-	result;
+	return result;
+}
+
+void * thread_worker(ThreadParam * param) {
+	param->result = find_min_max(param->v, param->limits[0], param->limits[1]);
+
+	pthread_exit(NULL);
 }
 
 result *
 min_max_100_svc(params *argp, struct svc_req *rqstp)
 {
-	static result  result;
+	static result result;
+  ThreadParam args[NUM_THREADS];
+  pthread_t threads[NUM_THREADS];
 
-	// init_shared();
+	float thread_results[NUM_THREADS * 2];
 
-  pid_t pid = fork();
-  // handle_failure(pid, "Não foi possível criar um processo filho\n");
+  for (int i = 0; i < NUM_THREADS; i++) {
+		args[i].v = argp->v;
 
-  if (pid > 0) {
-		struct result calc1 = get_min_max(argp->v, 0, argp->n / 2);
+    for (int j = 0; j < 2; j++) {
+      args[i].limits[j] = ((i + j) * argp->n) / NUM_THREADS;
+    }
 
-		sem_wait(mutex);
-
-		shared_data->min1 = calc1.min;
-		shared_data->max1 = calc1.max;
-
-		sem_post(mutex);
-
-		wait(NULL);
-
-		float list[4];
-		calc1 = get_min_max(list, 0, 3);
-
-		result = calc1;
-
-		return &result;
-  } else {
-		struct result calc2 = get_min_max(argp->v, argp->n / 2, argp->n);
-
-		sem_wait(mutex);
-
-		shared_data->min2 = calc2.min;
-		shared_data->max2 = calc2.max;
-
-		sem_post(mutex);
-
-		exit(0);
+    pthread_create(&threads[i], NULL, (void *) thread_worker, (void *) &args[i]);
   }
+
+	int count = -1;
+
+  for (int i = 0; i < NUM_THREADS; i++) {
+    pthread_join(threads[i], NULL);
+
+		thread_results[++count] = args[i].result.min;
+		thread_results[++count] = args[i].result.max;
+  }
+
+	result = find_min_max(thread_results, 0, NUM_THREADS * 2);
 
 	return &result;
 }
