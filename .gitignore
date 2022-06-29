@@ -1,0 +1,7 @@
+.vscode/*
+
+# Ignore PDF files
+*.pdf
+
+# Ignore zip files
+*.zip
