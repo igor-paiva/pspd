@@ -1,5 +1,5 @@
 require 'grpc'
-require_relative 'min_max_services_pb'
+require_relative 'min_max_bytes_services_pb'
 
 ARRAY_LENGTH = 500_000
 
@@ -9,12 +9,12 @@ end
 
 def rand_float_array(n)
   Array.new(n) do |i|
-    Element.new(value: Math.sqrt((i - (f_aleat(n) / 2)) ** 2))
+    Math.sqrt((i - (f_aleat(n) / 2)) ** 2)
   end
 end
 
 def main
-  hostname = ARGV.size > 0 ?  ARGV[0] : 'localhost:5000'
+  hostname = ARGV.size > 0 ?  ARGV[0] : 'localhost:5001'
 
   stub = MinMax::Stub.new(hostname, :this_channel_is_insecure)
 
@@ -23,9 +23,12 @@ def main
     list = rand_float_array(ARRAY_LENGTH)
     puts "depois de gerar o array"
 
+    puts "Min: #{list.min}"
+    puts "Max: #{list.max}"
+
     puts "antes de mandar a request"
-    reply = stub.min_max_calc(list)
-    puts "depois de mandar a request"
+    reply = stub.min_max_calc(MinMaxParams.new(list: list.pack('f*')))
+    puts "depois de mandar a request\n"
 
     p "Min: #{reply.min}"
     p "Max: #{reply.max}"

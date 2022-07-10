@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+message MinMaxParams {
+  bytes list = 1;
+}
+
+message MinMaxReply {
+  float min = 1;
+  float max = 2;
+}
+
+service MinMax {
+  rpc MinMaxCalc (MinMaxParams) returns (MinMaxReply) {}
+}
