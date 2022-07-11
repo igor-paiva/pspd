@@ -19,16 +19,9 @@ def main
   stub = MinMax::Stub.new(hostname, :this_channel_is_insecure)
 
   begin
-    puts "antes de gerar o array"
     list = rand_float_array(ARRAY_LENGTH)
-    puts "depois de gerar o array"
 
-    puts "Min: #{list.min}"
-    puts "Max: #{list.max}"
-
-    puts "antes de mandar a request"
     reply = stub.min_max_calc(MinMaxParams.new(list: list.pack('f*')))
-    puts "depois de mandar a request\n"
 
     p "Min: #{reply.min}"
     p "Max: #{reply.max}"

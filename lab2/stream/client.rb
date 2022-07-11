@@ -13,33 +13,13 @@ def rand_float_array(n)
   end
 end
 
-class ElementsEnumerator
-  def initialize
-    @items = rand_float_array(ARRAY_LENGTH)
-  end
-
-  def each_item
-    return enum_for(:each_item) unless block_given?
-
-    @items.each do |item|
-      yield item
-    end
-  end
-end
-
 def main
   hostname = ARGV.size > 0 ?  ARGV[0] : 'localhost:5000'
 
   stub = MinMax::Stub.new(hostname, :this_channel_is_insecure)
 
   begin
-    # puts "antes de gerar o array"
-    # list = rand_float_array(ARRAY_LENGTH)
-    # puts "depois de gerar o array"
-
-    puts "antes de mandar a request"
-    reply = stub.min_max_calc(ElementsEnumerator.new.each_item)
-    puts "depois de mandar a request\n"
+    reply = stub.min_max_calc(rand_float_array(ARRAY_LENGTH))
 
     p "Min: #{reply.min}"
     p "Max: #{reply.max}"

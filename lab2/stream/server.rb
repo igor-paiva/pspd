@@ -3,20 +3,13 @@ require_relative 'min_max_services_pb'
 
 class MinMaxServer < MinMax::Service
   def min_max_calc(call)
-    # min = nil
-    # max = nil
     min = Float::MAX
     max = Float::MIN
 
     call.each_remote_read do |element|
-      # if min.nil? && max.nil?
-      #   min = element.value
-      #   max = element.value
-      # else
       min = element.value if element.value < min
 
       max = element.value if element.value > max
-      # end
     end
 
     MinMaxReply.new(min: min, max: max)
