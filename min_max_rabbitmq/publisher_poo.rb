@@ -1,4 +1,5 @@
 require 'bunny'
+require 'thread'
 require 'securerandom'
 
 class Publisher
@@ -37,6 +38,7 @@ class Publisher
     @connection = Bunny.new(automatically_recover: false)
     @connection.start
 
+    @lock = Mutex.new
     @channel = @connection.create_channel
     @work_queue = @channel.queue(queue_name, durable: true)
 
@@ -54,9 +56,11 @@ class Publisher
       if @request_ids.include?(properties[:correlation_id])
         slice_min, slice_max = payload.unpack('f*')
 
-        @min = slice_min if slice_min < @min
+        @lock.synchronize {
+          @min = slice_min if slice_min < @min
 
-        @max = slice_max if slice_max > @max
+          @max = slice_max if slice_max > @max
+        }
 
         @answered_requests += 1
       end
