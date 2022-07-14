@@ -1,82 +1,98 @@
 require 'bunny'
+require 'thread'
 require 'securerandom'
 
-DEFAULT_ARRAY_SLICES = 2
-DEFAULT_ARRAY_LENGTH = 500_000
+class Publisher
+  DEFAULT_ARRAY_SLICES = 2
+  DEFAULT_ARRAY_LENGTH = 500_000
 
-def f_aleat(x)
-  rand(0..x.to_f)
-end
+  attr_reader :min, :max
 
-def rand_float_array(n)
-  srand(Time.now.to_i)
+  def initialize(slices, size, queue_name = 'min_max_queue')
+    @size = size || DEFAULT_ARRAY_LENGTH
+    @slices = slices || DEFAULT_ARRAY_SLICES
 
-  Array.new(n) do |i|
-    Math.sqrt((i - (f_aleat(n) / 2)) ** 2)
-  end
-end
+    @list = rand_float_array(@size)
 
-def find_min_max(list)
-  min = list.first
-  max = list.first
-
-  list.each do |el|
-    min = el if el < min
-
-    max = el if el > max
+    setup_connection(queue_name)
   end
 
-  return min, max
-end
+  def send_messages
+    @slices.times do |i|
+      l = (i * @size) / @slices
+      r = ((i + 1) * @size) / @slices
 
-def microseconds(value)
-  value.to_f / 1_000_000.0
-end
+      @work_queue.publish(@list[l..r].pack('f*'), persistent: true, correlation_id: @request_ids[i], reply_to: @reply_queue.name)
+    end
 
-def main
-  connection = Bunny.new(automatically_recover: false)
-  connection.start
+    wait_for_replies
+  end
 
-  list_slices = ARGV[0]&.to_i || DEFAULT_ARRAY_SLICES
-  array_length = ARGV[1]&.to_i || DEFAULT_ARRAY_LENGTH
+  def close_connection
+    @connection.close
+  end
 
-  received_ids = 0
-  list = rand_float_array(array_length)
-  request_ids = Array.new(list_slices) { SecureRandom.uuid }
+  private
 
-  min = list.first
-  max = list.first
+  def setup_connection(queue_name)
+    @connection = Bunny.new(automatically_recover: false)
+    @connection.start
 
-  channel = connection.create_channel
-  work_queue = channel.queue('min_max_queue', durable: true)
-  reply_queue = channel.queue('', exclusive: true)
+    @lock = Mutex.new
+    @channel = @connection.create_channel
+    @work_queue = @channel.queue(queue_name, durable: true)
 
-  reply_queue.subscribe do |_delivery_info, properties, payload|
-    if request_ids.include?(properties[:correlation_id])
-      slice_min, slice_max = payload.unpack('f*')
+    setup_reply_queue
+  end
 
-      min = slice_min if slice_min < min
+  def setup_reply_queue
+    @min = @list.first
+    @max = @list.first
+    @answered_requests = 0
+    @reply_queue = @channel.queue('', exclusive: true)
+    @request_ids = Array.new(@slices) { SecureRandom.uuid }
 
-      max = slice_max if slice_max > max
+    @reply_queue.subscribe do |_delivery_info, properties, payload|
+      if @request_ids.include?(properties[:correlation_id])
+        slice_min, slice_max = payload.unpack('f*')
 
-      received_ids += 1
+        @lock.synchronize {
+          @min = slice_min if slice_min < @min
+
+          @max = slice_max if slice_max > @max
+
+          @answered_requests += 1
+        }
+      end
     end
   end
 
-  list_slices.times do |i|
-    l = (i * array_length) / list_slices
-    r = ((i + 1) * array_length) / list_slices
-
-    work_queue.publish(list[l..r].pack('f*'), persistent: true, correlation_id: request_ids[i], reply_to: reply_queue.name)
+  def wait_for_replies
+    while @answered_requests < @slices
+      sleep(microseconds(15))
+    end
   end
 
-  while received_ids < list_slices
-    sleep(microseconds(15))
+  def f_aleat(x)
+    rand(0..x.to_f)
   end
 
-  puts "Min: #{min}\nMax: #{max}"
+  def rand_float_array(n)
+    srand(Time.now.to_i)
 
-  connection.close
+    Array.new(n) do |i|
+      Math.sqrt((i - (f_aleat(n) / 2)) ** 2)
+    end
+  end
+
+  def microseconds(value)
+    value.to_f / 1_000_000.0
+  end
 end
 
-main
+publisher = Publisher.new(ARGV[0]&.to_i, ARGV[1]&.to_i)
+
+publisher.send_messages
+publisher.close_connection
+
+puts "Min: #{publisher.min}\nMax: #{publisher.max}"
