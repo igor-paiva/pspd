@@ -32,7 +32,7 @@ File.open(output_filename, 'w') do |file|
 
     person = random_person(classes)
 
-    file.write(person)
+    bytes_written += file.write(person)
 
     num_friends = rand(1..MAX_FRIENDS_PER_LINE)
 
