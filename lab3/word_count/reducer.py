@@ -9,10 +9,7 @@ for line in sys.stdin:
     # line: WORD \t COUNT
     word, count = line.split("\t", 1)
 
-    try:
-        count = int(count)
-    except ValueError:
-        continue
+    count = int(count)
 
     if current_word == word:
         current_count += count

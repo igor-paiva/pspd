@@ -1,18 +1,18 @@
 require 'faker'
 
 classes = [
-  { klass: Faker::Name, methods: %i[first_name middle_name] },
-  { klass: Faker::Movies::BackToTheFuture, methods: %i[character] },
-  { klass: Faker::Movies::LordOfTheRings, methods: %i[character] },
-  { klass: Faker::Movies::StarWars, methods: %i[character] },
-  { klass: Faker::Movies::Hobbit, methods: %i[character] },
-  { klass: Faker::TvShows::RickAndMorty, methods: %i[character] }
+  [Faker::Name, :first_name],
+  [Faker::Movies::BackToTheFuture, :character],
+  [Faker::Movies::LordOfTheRings, :character],
+  [Faker::Movies::StarWars, :character],
+  [Faker::Movies::Hobbit, :character],
+  [Faker::TvShows::RickAndMorty, :character]
 ]
 
 MAX_FRIENDS_PER_LINE = 15
 
-megabytes_to_write = ARGV.size > 0 ?  ARGV[0].to_i : 250
-output_filename = ARGV.size > 1 ?  ARGV[1] : 'input.txt'
+output_filename = ARGV.size > 0 ?  ARGV[0] : 'input.txt'
+megabytes_to_write = ARGV.size > 1 ?  ARGV[1].to_i : 250
 
 bytes_to_write = megabytes_to_write << 20
 
@@ -21,14 +21,9 @@ bytes_written = 0
 srand(Time.now.to_i)
 
 def random_person(classes)
-  data = classes.sample
-  method = data[:methods].sample
+  klass, method = classes.sample
 
-  person = data[:klass].send(method)
-
-  return person.split.first if person.include?(' ')
-
-  person
+  klass.send(method)
 end
 
 File.open(output_filename, 'w') do |file|

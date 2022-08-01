@@ -6,13 +6,11 @@ person = None
 
 for line in sys.stdin:
     line = line.strip()
+
     # line: PERSON \s COUNT
     person, count = line.split(" ", 1)
 
-    try:
-        count = int(count)
-    except ValueError:
-        continue
+    count = int(count)
 
     if current_person == person:
         current_count += count
