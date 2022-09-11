@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+message SumByteArrayParam {
+  uint32 length = 1;
+  bytes list = 2;
+}
+
+message SumArrayParam {
+  float value = 1;
+}
+
+message SumParams {
+  float x = 1;
+  float y = 2;
+}
+
+message SumReply {
+  float result = 1;
+}
+
+service Sum {
+  rpc SumCalc (SumParams) returns (SumReply) {}
+
+  rpc SumArrayCalc (stream SumArrayParam) returns (SumReply) {}
+
+  rpc SumByteArrayCalc (SumByteArrayParam) returns (SumReply) {}
+}
