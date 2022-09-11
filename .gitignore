@@ -7,8 +7,11 @@
 # Unignore all dirs
 !*/
 
-# Unignore all dirs
+# Unignore all Makefile
 !**/Makefile
+
+# Unignore all Dockerfile
+!**/Dockerfile
 
 .vscode/*
 
